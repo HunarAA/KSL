@@ -8,7 +8,6 @@ import streamlit as st
 import matplotlib.colors as mcolors
 from PIL import Image
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
-
 from config import CLASSES, WEBRTC_CLIENT_SETTINGS
 
 st.set_page_config(
@@ -83,9 +82,9 @@ class VideoTransformer(VideoTransformerBase):
         for bbox_data in result:
             xmin, ymin, xmax, ymax, _, label = bbox_data
             p0, p1, label = (int(xmin), int(ymin)), (int(xmax), int(ymax)), int(label)
-            img = cv2.rectangle(img, 
-                                    p0, p1, 
-                                    self.rgb_colors[label], 2) 
+            img = cv2.rectangle(img,p0, p1, self.rgb_colors[label], 2)
+            img = cv2.putText(img, str(CLASSES[label]), (p1[0] - 100, p0[1]-20),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, rgb_colors[label], 1)
 
         return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -95,11 +94,8 @@ class VideoTransformer(VideoTransformerBase):
 #region Load model
 # ---------------------------------------------------
 
-model_type = st.sidebar.selectbox(
-    'جۆری مۆدێل',
-    ('M-21', 'M-10', 'S-10'),
-    index=1,
-    format_func=lambda s: s.upper())
+model_type = st.sidebar.selectbox('جۆری مۆدێل',('M-21', 'M-10', 'S-10'),
+    index=1,format_func=lambda s: s.upper())
 
 with st.spinner('Loading the model...'):
     model = get_yolo5(model_type)
@@ -116,7 +112,7 @@ prediction_mode = st.sidebar.radio(
     index=0)
     
 classes_selector = st.sidebar.multiselect('ئاماژەکان دیاری بکە', 
-                                        CLASSES, default='ڕوبەڕوو')
+                                        CLASSES, default='Ruberru')
 all_labels_chbox = st.sidebar.checkbox('هەموو ئاماژەکان', value=False)
 
 # Prediction section
@@ -157,9 +153,9 @@ with col1:
             for bbox_data in result_copy:
                 xmin, ymin, xmax, ymax, _, label = bbox_data
                 p0, p1, label = (int(xmin), int(ymin)), (int(xmax), int(ymax)), int(label)
-                img_draw = cv2.rectangle(img_draw, 
-                                        p0, p1, 
-                                        rgb_colors[label], 2) 
+                img_draw = cv2.rectangle(img_draw, p0, p1, rgb_colors[label], 15)
+                img_draw = cv2.putText(img_draw, str(CLASSES[label]), (p1[0] - 300, p0[1]-20),
+                    cv2.FONT_HERSHEY_DUPLEX, 3, rgb_colors[label], 2)
                 detected_ids.append(label)
             
             st.image(img_draw, use_column_width=True)
